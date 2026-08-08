@@ -1,0 +1,6 @@
+{
+  "name": "AI CreatorHub",
+  "description": "AI-powered content management platform for creators featuring Gemini AI captioning, function calling, role-based authorization, and media management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
