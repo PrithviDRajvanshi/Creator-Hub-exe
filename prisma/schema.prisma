@@ -1,0 +1,59 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String         @id
+  email         String         @unique
+  subscriptions Subscription[]
+}
+
+model Plan {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  price         Decimal        @db.Decimal(10, 2)
+  features      PlanFeature[]
+  subscriptions Subscription[]
+}
+
+model PlanFeature {
+  id          String @id @default(uuid())
+  planId      String
+  description String
+  
+  plan        Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  
+  @@index([planId])
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String
+  planId    String
+  status    String   // 'active', 'canceled', 'past_due'
+  startDate DateTime @default(now())
+  endDate   DateTime
+  
+  user      User      @relation(fields: [userId], references: [id])
+  plan      Plan      @relation(fields: [planId], references: [id])
+  payments  Payment[]
+  
+  @@index([userId])
+  @@index([planId])
+}
+
+model Payment {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  amount         Decimal      @db.Decimal(10, 2)
+  status         String       // 'success', 'failed', 'pending'
+  paymentDate    DateTime     @default(now())
+
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  
+  @@index([subscriptionId])
+}
