@@ -8,3 +8,9 @@ coverage/
 !.env.example
 
 /src/generated/prisma
+
+# IDE and Agent Files
+.agents/
+.claude/
+.windsurf/
+skills-lock.json

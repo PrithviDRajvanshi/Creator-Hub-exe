@@ -7,8 +7,11 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env.NODE_ENV === 'test' 
+      ? (process.env.DATABASE_URL_TEST || process.env.DATABASE_URL)
+      : process.env.DATABASE_URL,
   },
 });
