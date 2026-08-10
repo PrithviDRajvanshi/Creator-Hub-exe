@@ -11,7 +11,7 @@ import contentRoutes from './routes/contentRoutes.js';
 import mediaRoutes from './routes/mediaRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-
+import billingRoutes from './routes/billingRoutes.js';
 const app = express();
 app.set('trust proxy', 1);
 
@@ -52,6 +52,7 @@ app.use('/api/content', contentRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/billing', billingRoutes);
 
 // Global Error Handler for API
 app.use(errorHandler);
