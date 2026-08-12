@@ -16,15 +16,17 @@ export const demonstrateFunctionHoisting = (): string => {
  * Returns the value of a `var` variable before it is initialized.
  */
 export const demonstrateVarHoisting = () => {
-  // @ts-ignore - we are intentionally testing var hoisting behavior which TS complains about
-  const valueBeforeInitialization = hoistedVar;
+  // Use new Function to cleanly isolate the JS runtime execution from TypeScript's static analyzer
+  const testHoisting = new Function(`
+    var valueBeforeInitialization = hoistedVar;
+    var hoistedVar = 'initialized value';
+    return {
+      valueBeforeInitialization: valueBeforeInitialization,
+      valueAfterInitialization: hoistedVar
+    };
+  `);
   
-  var hoistedVar = 'initialized value';
-  
-  return {
-    valueBeforeInitialization, // Will be undefined
-    valueAfterInitialization: hoistedVar // Will be 'initialized value'
-  };
+  return testHoisting();
 };
 
 /**
@@ -33,14 +35,23 @@ export const demonstrateVarHoisting = () => {
  */
 export const demonstrateTDZ = () => {
   try {
-    // @ts-ignore - intentional TDZ violation for demonstration
-    const x = tdzVariable;
-    let tdzVariable = 'I am in TDZ';
-    return x;
-  } catch (error: any) {
+    // Use new Function to cleanly isolate the JS runtime execution from TypeScript's static analyzer
+    const testTDZ = new Function(`
+      const x = tdzVariable;
+      let tdzVariable = 'I am in TDZ';
+      return x;
+    `);
+    testTDZ();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return {
+        name: error.name,
+        message: error.message
+      };
+    }
     return {
-      name: error.name,
-      message: error.message
+      name: 'UnknownError',
+      message: 'An unknown error occurred'
     };
   }
 };
