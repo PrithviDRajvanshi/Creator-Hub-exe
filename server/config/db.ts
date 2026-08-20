@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MONGODB_URI } from './env.js';
 
 let mongoMemoryServer: MongoMemoryServer | null = null;
 
 export async function connectDB(): Promise<void> {
   try {
-    const uri = process.env.MONGODB_URI;
+    const uri = MONGODB_URI;
 
     if (uri && uri !== 'mongodb://localhost:27017/aicreatorhub') {
       try {

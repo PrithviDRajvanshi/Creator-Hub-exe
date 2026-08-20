@@ -3,12 +3,10 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { AuthRequest } from '../middleware/authMiddleware.js';
 import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema } from '../validators/authValidator.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'aicreatorhub_secure_jwt_secret_key_2026_xyz';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+import { getJwtSecret, JWT_EXPIRES_IN } from '../config/env.js';
 
 function generateToken(id: string): string {
-  return jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN as any });
+  return jwt.sign({ id }, getJwtSecret(), { expiresIn: JWT_EXPIRES_IN as any });
 }
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
