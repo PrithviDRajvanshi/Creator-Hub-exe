@@ -79,27 +79,44 @@ ai-creatorhub/
 
 ---
 
-## ⚙️ Environment Variables
+## ⚙️ Environment Variables & Secrets Management
 
-Create a `.env` file in the root directory and configure the following variables based on your setup:
+To configure your local environment or production deployment:
+
+1. **Copy the example template:**
+   ```bash
+   cp .env.example .env
+   ```
+2. **Fill in your secret values** in `.env`:
+   - `GEMINI_API_KEY`: Required for Google Gemini AI generation features.
+   - `JWT_SECRET`: Secret key used for signing authentication JSON Web Tokens.
+   - `JWT_EXPIRES_IN`: Token validity period (e.g. `7d`).
+   - `MONGODB_URI`: MongoDB connection string (falls back to embedded database if omitted).
+   - `PORT`: Server port (defaults to `3000`).
 
 ```env
 # Google Gemini API Key (Required for AI generation)
 GEMINI_API_KEY="your_gemini_api_key_here"
 
-# Application URL
+# Application Settings
 APP_URL="http://localhost:3000"
-
-# Server Port
 PORT=3000
+NODE_ENV="development"
 
 # MongoDB Connection String (System auto-starts an embedded DB if omitted)
 MONGODB_URI="mongodb://localhost:27017/aicreatorhub"
 
 # JWT Authentication Config
-JWT_SECRET="your_super_secret_jwt_key"
+JWT_SECRET="your_jwt_secret_key_here"
 JWT_EXPIRES_IN="7d"
 ```
+
+> **🛡️ Security Guidelines & Secrets Management:**
+> - **Environment Variable Isolation**: `JWT_SECRET` and API keys are sensitive configuration secrets. Production deployments receive these credentials strictly through environment variables.
+> - **Git Exclusion**: `.env` is excluded via `.gitignore`, while `.env.example` documents required variable names using safe placeholders (`JWT_SECRET="your_jwt_secret_key_here"`).
+> - **Development Fallback vs. Production Fail-Fast**: A fallback secret exists strictly for local development convenience (`NODE_ENV !== 'production'`). In production (`NODE_ENV === 'production'`), the server strictly enforces fail-fast validation: if `JWT_SECRET` is missing or set to a placeholder, the application halts immediately with a fatal configuration error rather than falling back to a default secret.
+> - **Preventing Token Forgery**: A static or hard-coded fallback in production would allow any attacker with repository access to forge valid JWTs and impersonate users. Enforcing unique secrets per deployment mitigates token forgery risks.
+> - **Secret Rotation**: Rotating `JWT_SECRET` automatically invalidates all existing user session tokens signed with the previous key, so secret rotation should be managed deliberately.
 
 ---
 

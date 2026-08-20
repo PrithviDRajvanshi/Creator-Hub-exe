@@ -5,16 +5,18 @@ import { createServer as createViteServer } from 'vite';
 import { connectDB } from './server/config/db.js';
 import { seedInitialData } from './server/utils/seed.js';
 import { app } from './server/app.js';
+import { validateEnv, PORT, NODE_ENV } from './server/config/env.js';
 
 async function startServer() {
-  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  // Validate Environment Variables on Startup
+  validateEnv();
 
   // Connect Database & Seed Initial Data
   await connectDB();
   await seedInitialData();
 
   // Vite Integration for Development / Static Production Serving
-  if (process.env.NODE_ENV !== 'production') {
+  if (NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',

@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, IUser } from '../models/User.js';
+import { getJwtSecret } from '../config/env.js';
 
 export interface AuthRequest extends Request {
   user?: IUser;
 }
-
-const JWT_SECRET = process.env.JWT_SECRET || 'aicreatorhub_secure_jwt_secret_key_2026_xyz';
 
 export async function protect(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -21,7 +20,9 @@ export async function protect(req: AuthRequest, res: Response, next: NextFunctio
       return;
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    // Dynamically resolve JWT_SECRET; fails fast in production mode if unconfigured
+    const secret = getJwtSecret();
+    const decoded = jwt.verify(token, secret) as { id: string };
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {

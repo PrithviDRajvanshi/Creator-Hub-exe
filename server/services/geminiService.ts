@@ -1,14 +1,13 @@
 import { GoogleGenAI } from '@google/genai';
 import { sanitizeAndGuardPrompt, buildSystemInstructions } from '../utils/promptDefense.js';
 import { creatorToolDeclarations, executeToolCall } from './geminiTools.js';
-
-const apiKey = process.env.GEMINI_API_KEY || '';
+import { GEMINI_API_KEY } from '../config/env.js';
 
 function getAIClient(): GoogleGenAI {
-  if (!process.env.GEMINI_API_KEY) {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
     console.warn('GEMINI_API_KEY environment variable is not configured. AI service calls will throw an error if invoked.');
   }
-  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'MISSING_KEY' });
+  return new GoogleGenAI({ apiKey: GEMINI_API_KEY || 'MISSING_KEY' });
 }
 
 export async function generateCaptions(

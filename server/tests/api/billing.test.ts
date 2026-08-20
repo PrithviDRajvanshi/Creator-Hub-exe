@@ -6,7 +6,7 @@ import { User } from '../../models/User.js';
 import jwt from 'jsonwebtoken';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import prisma from '../../config/prisma.js';
-import { describe as describeAlias } from 'vitest';
+import { getJwtSecret } from '../../config/env.js';
 
 let mongoServer: MongoMemoryServer;
 let testToken: string;
@@ -29,7 +29,7 @@ beforeAll(async () => {
   testUserEmail = user.email;
 
   // Generate Token
-  const secret = process.env.JWT_SECRET || 'aicreatorhub_secure_jwt_secret_key_2026_xyz';
+  const secret = getJwtSecret();
   testToken = jwt.sign({ id: testUserId, role: 'USER' }, secret, {
     expiresIn: '1h',
   });
