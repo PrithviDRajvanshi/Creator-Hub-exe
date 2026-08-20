@@ -93,3 +93,44 @@ Audit performed by reading every source file in the repository. No files were mo
 - **What to change:** Add a code comment in `server.ts` near the async server startup explaining how `await connectDB()` yields to the event loop. Optionally add a small demonstrative comment showing microtask (Promise) vs macrotask (setTimeout) ordering.
 - **Demo:** Explain the async server startup flow in viva
 - **Viva explanation:** "Our server uses `async/await` extensively. When we `await connectDB()`, the function yields control back to the event loop, allowing other I/O operations. Express request handlers are event-loop callbacks — each incoming request is a macrotask, and our `await` calls within handlers create microtasks that resolve before the next macrotask."
+
+---
+
+## JavaScript Core Concepts — Detailed Viva Implementation Reference
+
+### 1. Closures & Stale-State Prevention
+- **File**: [`src/pages/ContentListPage.tsx`](file:///c:/Users/Deepak/AI-CreatorHub/src/pages/ContentListPage.tsx)
+- **Function**: `handleDelete(id: string)`
+- **Closure Mechanism**: `handleDelete` is defined inside `ContentListPage` component scope. When invoked, it retains lexical access to `id`. Even after `await api.delete('/content/${id}')` pauses and resumes, the closure preserves access to `id`.
+- **Stale-State Prevention**: `setContents((prev) => prev.filter(item => item._id !== id))` uses a functional state update. React provides the latest previous state as `prev`, preventing stale array reads captured during earlier render cycles.
+- **Crucial Distinction**: The closure preserves `id` across the async boundary, while the functional updater (`prev => ...`) ensures state mutations operate on React's up-to-date state.
+
+### 2. Hoisting (Function Declarations vs `var` vs `let`/`const` TDZ)
+- **Files**: [`server/utils/javascriptConcepts.ts`](file:///c:/Users/Deepak/AI-CreatorHub/server/utils/javascriptConcepts.ts), [`server/tests/unit/javascriptConcepts.test.ts`](file:///c:/Users/Deepak/AI-CreatorHub/server/tests/unit/javascriptConcepts.test.ts)
+- **Functions**: `demonstrateFunctionHoisting()`, `demonstrateVarHoisting()`, `demonstrateTDZ()`
+- **Observable Execution**:
+  - `demonstrateFunctionHoisting()` calls `hoistedFunction()` before its textual declaration in source code and succeeds because function declarations are hoisted during compilation.
+  - `demonstrateVarHoisting()` demonstrates `var` declarations are hoisted and initialized to `undefined` before assignment.
+  - `demonstrateTDZ()` catches and asserts a `ReferenceError` when accessing `let`/`const` variables before initialization within the Temporal Dead Zone.
+
+### 3. Async/Await & Try/Catch Error Assertion
+- **File**: [`server/tests/unit/userModel.test.ts`](file:///c:/Users/Deepak/AI-CreatorHub/server/tests/unit/userModel.test.ts)
+- **Test Names**: `should catch and assert Mongoose ValidationError...`, `should catch and assert duplicate key error...`
+- **Execution Flow**:
+  1. Test function is marked `async`.
+  2. Mongoose `user.save()` returns a Promise.
+  3. `await` pauses test execution until the Promise resolves or rejects.
+  4. Validation or constraint failure causes the Promise to reject and throw inside the `async` function.
+  5. Control transfers immediately to the `catch (error)` block.
+  6. Assertions verify `error.name === 'ValidationError'` or `error.code === 11000`.
+  7. The test passes because the expected failure was caught and asserted.
+
+### 4. Promises vs Callbacks & Promise Chaining
+- **Files**: [`server/utils/javascriptConcepts.ts`](file:///c:/Users/Deepak/AI-CreatorHub/server/utils/javascriptConcepts.ts), [`server/tests/unit/javascriptConcepts.test.ts`](file:///c:/Users/Deepak/AI-CreatorHub/server/tests/unit/javascriptConcepts.test.ts)
+- **Function**: `demonstratePromiseChain(userId)`
+- **Chain Pipeline**:
+  `fetchUserContext(userId) → .then(fetchUserDraft) → .then(generateAIEnhancements) → .catch(handleError)`
+- **Comparison to Callbacks**:
+  - **Callbacks**: Nested "Pyramid of Doom", scattered error checks at each callback level, difficult data forwarding.
+  - **Promises**: Flat `.then()` pipeline, single centralized `.catch()` block, natural data flow between stages.
+

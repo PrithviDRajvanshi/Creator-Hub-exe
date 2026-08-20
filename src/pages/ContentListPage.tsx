@@ -26,6 +26,11 @@ export const ContentListPage: React.FC = () => {
   const [status, setStatus] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  /**
+   * CLOSURE EXAMPLE:
+   * fetchContents is a closure created inside the ContentListPage component scope.
+   * It retains lexical access to component state variables (search, category, status).
+   */
   const fetchContents = async () => {
     setLoading(true);
     try {
@@ -54,6 +59,22 @@ export const ContentListPage: React.FC = () => {
     fetchContents();
   };
 
+  /**
+   * CLOSURE & STALE STATE PREVENTION DEMONSTRATION:
+   * 
+   * 1. CLOSURE CONCEPT:
+   * `handleDelete` is a closure defined within ContentListPage. When triggered by a click,
+   * it captures and retains access to its lexical environment, specifically the `id` argument.
+   * The `id` remains in scope and available after `await api.delete(...)` pauses and resumes.
+   * 
+   * 2. STALE-STATE PREVENTION:
+   * The functional state updater `setContents((prev) => prev.filter(item => item._id !== id))`
+   * is what prevents stale state. Rather than relying on a potentially stale `contents` array
+   * captured when this render occurred, React passes the latest, up-to-date state as `prev`.
+   * 
+   * Note: The closure retains `id` across the async boundary, while the functional updater
+   * (`prev => ...`) ensures state operations always execute against React's latest state.
+   */
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this content item?')) return;
 
@@ -61,6 +82,7 @@ export const ContentListPage: React.FC = () => {
     try {
       const res = await api.delete(`/content/${id}`);
       if (res.data.success) {
+        // Functional state update passes latest state (`prev`) to avoid stale state reference
         setContents((prev) => prev.filter((item) => item._id !== id));
       }
     } catch (err) {
